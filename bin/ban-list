@@ -1,0 +1,62 @@
+#!/usr/bin/env php
+<?php
+
+$fileName = pathinfo(__FILE__, PATHINFO_BASENAME);
+$usage = implode("\n", [
+    sprintf('Usage: %s sqlite_file_path operation ...', $fileName),
+    '    sqlite_file_path: path to sqlite file relative to the current working directory.',
+    '    operation: add, remove, or clear.',
+    '    ...: If the operation was "add" or "remove" then 1 or more ip addresses.',
+]) . "\n";
+
+$cwd = getcwd();
+
+foreach ($GLOBALS['argv'] as $i => $arg) {
+    $path = $cwd . '/' . $arg;
+
+    if (__FILE__ === @realpath($path)) {
+        $args = array_slice($GLOBALS['argv'], $i + 1);
+
+        break;
+    }
+}
+
+$task = array_shift($args);
+$file = $cwd . '/' . array_shift($args);
+$endPoints = $args;
+
+if (!$task || !$file) {
+    exit($usage);
+}
+
+require __DIR__ . '/../src/classes/autoload/Exception.php';
+require __DIR__ . '/../src/classes/autoload/EndPoint.php';
+require __DIR__ . '/../src/classes/autoload/Store.php';
+
+try {
+    $banList = new \CommunityHub\Component\BanList\Store($file);
+
+    if (in_array($task, ['add', 'remove'])) {
+        if (empty($endPoints)) {
+            exit($usage);
+        }
+
+        foreach ($endPoints as $endPoint) {
+            $endPoint = \CommunityHub\Component\BanList\EndPoint::make($endPoint);
+
+            $banList->$task($endPoint);
+        }
+    } elseif ('clear' === $task) {
+        if (!empty($endPoints)) {
+            exit($usage);
+        }
+
+        $banList->clear();
+    } else {
+        exit($usage);
+    }
+} catch (\CommunityHub\Component\BanList\Exception $e) {
+    echo $e->getMessage() . "\n";
+}
+
+echo 'Operation completed' . "\n";

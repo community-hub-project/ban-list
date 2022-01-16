@@ -1,0 +1,33 @@
+{
+    "name": "community-hub/ban-list",
+    "description": "A lightweight sqlite-powered package for banning IP addresses.",
+    "license": "MIT",
+    "bin": ["bin/ban-list"],
+    "autoload": {
+        "files": ["src/helpers.php"],
+        "psr-4": {
+            "CommunityHub\\Components\\BanList\\": "src/classes/autoload"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "test/tests"
+        }
+    },
+    "require": {
+        "ext-pdo_sqlite": "*",
+        "ext-pdo": "*",
+        "php": ">=8.0"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.6",
+        "phpunit/phpunit": "^9.5"
+    },
+    "scripts": {
+        "test": ["@phpunit", "@phpcs"],
+        "phpunit": "phpunit",
+        "phpcs": ["@phpcs.src", "@phpcs.tests"],
+        "phpcs.src": "phpcs src bin/ban-list --standard=phpcs.src.xml",
+        "phpcs.tests": "phpcs src --standard=phpcs.tests.xml"
+    }
+}
